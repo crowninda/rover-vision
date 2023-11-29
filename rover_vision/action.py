@@ -1,9 +1,9 @@
-
-# 根據算法提供最佳路線座標，依序轉換為自走車前進步數與轉彎方向
+# According to the algorithm, provide the optimal route coordinates, and then convert them into the number of 
+# steps forward and the direction of turns for the autonomous vehicle
 import sys
 sys.path.append('/home/pi/picar-4wd')
 
-# 常量
+# constant
 TURN_LEFT = "turn_left"
 TURN_RIGHT = "turn_right"
 UP = "up"
@@ -12,83 +12,74 @@ RIGHT = "right"
 LEFT = "left"
 
 
-def turning_direction_and_step(x_diff: int, y_diff: int, current_direct: list, movements: list, step_count: int) -> list:
+def turning_direction_and_step(x_diff: int, y_diff: int, current_action: list, movements: list, step_count: int) -> list:
     ''' 
-    判斷自走車接下來要採取的動作和走的步數
+    determine the next action the car will take and the number of steps it will take
     
     Args: 
-        x_diff: 計算當下與下一步的 x座標的差異
-        y_diff: 計算當下與下一步的 y座標的差異
-        current_direct: 自走車當下動作
-        movements: 紀錄自走車依序應該做的動作 
+        x_diff: the difference between the current x-coordinate and the x-coordinate of the next step 
+        y_diff: the difference between the current y-coordinate and the y-coordinate of the next step
+        current_action: the current movement of the car 
+        movements: record the actions that the car should do in sequence
     
     Returns:
-        step_count: 最後一個轉彎後，直走的步數
+        step_count: number of steps taken straight after the last turn
     '''
-
-    # 下一步 y 座標變動
     if y_diff != 0:
 
-        # 當下的動作方向是x軸改變
-        if current_direct[0] == "x":
+        # The current action direction involves a change in the x-axis 
+        if current_action[0] == "x":
 
-            # 當自走車下一步的x或y軸變化時，代表車子即將改變方向，將累計的步數存入
+            # When the axis direction changes in the next step of the car, it indicates that the vehicle
+            #  is about to change direction, and the previously accumulated steps will be stored 
             movements.append(step_count)
 
-            # 步數歸零，重新計算
+            # return the number of steps to zero and recalculate
             step_count = 0
-
-            # 當自走車下一步 y座標增加且當下前進的方向向右，或y座標減少且當下前進的方向向左，則接下來要向左轉
-            if (y_diff > 0 and current_direct[1] == RIGHT) or (y_diff < 0 and current_direct[1] == LEFT):               
+            if (y_diff > 0 and current_action[1] == RIGHT) or (y_diff < 0 and current_action[1] == LEFT):               
                 movements.append(TURN_LEFT)
-
-            # 當自走車下一步 y座標減少且當下前進的方向向右，或y座標增加且當下前進的方向向左，則接下來要向右轉
-            elif (y_diff < 0 and current_direct[1] == RIGHT) or (y_diff > 0 and current_direct[1] == LEFT):
+            elif (y_diff < 0 and current_action[1] == RIGHT) or (y_diff > 0 and current_action[1] == LEFT):
                 movements.append(TURN_RIGHT)
-        
-        # 修改當前動作座標變化為y軸
-        current_direct[0] = "y"
-
+        current_action[0] = "y"
         if y_diff > 0: 
-            current_direct[1] = UP
+            current_action[1] = UP
         elif y_diff < 0: 
-            current_direct[1] = DOWN
+            current_action[1] = DOWN
    
     elif x_diff != 0:
-        if current_direct[0] == "y":
+        if current_action[0] == "y":
             movements.append(step_count)
             step_count = 0
-            if (x_diff < 0 and current_direct[1] == UP) or (x_diff > 0 and current_direct[1] == DOWN):
+            if (x_diff < 0 and current_action[1] == UP) or (x_diff > 0 and current_action[1] == DOWN):
                 movements.append(TURN_LEFT)   
-            elif (x_diff < 0 and current_direct[1] == DOWN) or (x_diff > 0 and current_direct[1] == UP):
+            elif (x_diff < 0 and current_action[1] == DOWN) or (x_diff > 0 and current_action[1] == UP):
                 movements.append(TURN_RIGHT)
 
-        current_direct[0] = "x"
-
+        current_action[0] = "x"
         if x_diff > 0: 
-            current_direct[1] = RIGHT
+            current_action[1] = RIGHT
         elif x_diff < 0: 
-            current_direct[1] = LEFT
+            current_action[1] = LEFT
 
-    # 當自走車保持相同x或y周方向前進時，步數持續增加
+    # when the car keeps moving in the same x or y axis direction, the number of steps continues to increase
     step_count += 1
     return step_count
 
 
 def first_step(current_direct: list, start_point: int, path: list) -> list:
     ''' 
-    確定自走車的第一步 是沿著哪軸，並朝哪一個方向走
+    confirm which axis and in which direction the car will move in its first step
     
     Args:
-        current_direct: 第1步相較起點座標要走的方向
-        start_point: 最佳路徑圖的起點座標
-        path: 最佳路徑圖
+        current_direct: starting from the starting point, the first step is to take the direction of progress
+        start_point: starting point coordinates of the optimal path map 
+        path: best road map
     
     Returns:
-        current_direct: 得到變動的軸向與方向
+        current_direct: get the axis and direction of the change
     '''
     
-    # x 座標變化
+    # x coordinate change x 座標變化
     if start_point[0] != path[1][0]: 
         current_direct[0] = "x"
         if path[1][0] > start_point[0]: 
@@ -96,51 +87,45 @@ def first_step(current_direct: list, start_point: int, path: list) -> list:
         else: 
             current_direct[1] = LEFT
     
-    # y 座標變化
+    # y coordinate change y 座標變化
     elif start_point[1] != path[1][1]:
         current_direct[0] = "y"
         if path[1][1] > start_point[1]:
             current_direct[1] = UP
         else: 
             current_direct[1] = DOWN
-
-    print("first_step: {}".format(current_direct))
     return current_direct
 
 
 def calculate_movement(path: list) -> list:
     '''
-    根據座標list，換算自走車要做的動作
+    according to the coordinate list, convert it into the action to be performed by the car 
 
     Args:
-        path: 起點到終點最佳路徑的座標圖
+        path: coordinate map of the best path from starting point to end point 
 
     Returns:
-        movements: 自走車自起點到終點依序的移動方位及步數 
+        movements: the moving direction and number of steps of the car from the starting point to the end point 
     '''
-    current_direct = [None, None] # current_direct[0] 是當下要走的軸(x或y軸)  current_direct[1] 是當下要走的方向(上 下 左 右)
-    start_point = path[0] # 自走車移動路線的第一個座標位置
-    movements = [] # 儲存驅動的方向與步數的列表
-    step_count = 0  # 驅動的步數計數
-
-    # 觀察第一步要移動的座標軸與方向
+    current_direct = [None, None] # current_direct[0] is the axis (x or y-axis) to be followed currently, 
+                                  # and current_direct[1] is the current direction to move in (up, down, left, right) 
+    start_point = path[0] # the starting point 
+    movements = [] # store a list of turning directions and number of steps for driving the car
+    step_count = 0  # car step counting
     current_direct = first_step(current_direct, start_point, path)
 
-    # 若第一步改變的方向是x軸，且左或右走，則以自走車為中心，先加入轉彎的動作
+    # if the direction of change in the first step is the x-axis, then take the car as the center and first add the turning action
     if current_direct[0] == 'x' and current_direct[1] == LEFT:
         movements.append(TURN_LEFT)
     elif current_direct[0] == 'x' and current_direct[1] == RIGHT:
         movements.append(TURN_RIGHT)
 
-
-    # 根據路徑座標換算自走車前進步數與轉彎方向
+    # convert the number of forward steps and turning direction of the car based on the path coordinates
     for i in range(len(path) - 1):
         current_x, current_y = path[i]
         next_x, next_y = path[i + 1]
         x_diff = next_x - current_x
         y_diff = next_y - current_y
-
-        # 此step_count為最後一段要走的步數長
         step_count = turning_direction_and_step(x_diff, y_diff, current_direct, movements, step_count)
     movements.append(step_count)
     return movements

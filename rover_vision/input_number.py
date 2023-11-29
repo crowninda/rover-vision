@@ -1,5 +1,5 @@
 
-# 檢查輸入座標是否符合限制規則
+# check whether the input coordinates comply with the restriction rules
 import sys
 sys.path.append('/home/pi/picar-4wd')
 import navigation
@@ -10,25 +10,25 @@ class DataInput:
         self.num_x = 0
         self.num_y = 0
     
-    def check_number_range(self, num: str, coordinate: str) -> bool:
+    def check_number_range(self, num: str, axis: str) -> bool:
         '''
-        確認輸入座標範圍
+        confirm the range of input coordinates
 
         Args:
-            num: 輸入的座標
-            coordinate: 輸入數字屬於x或y 座標
+            num: input coordinates
+            axis: the input coordinate is either an x-coordinate or a y-coordinate
 
         Returns:
-                bool: 回傳是否判斷結果
+                bool: return the judgment result
         '''
-        if coordinate == "x":
-            if float(num) > navigation.MAX_X:
-                print(f"Please input a number smaller than {navigation.MAX_X}")
+        if axis == "x":
+            if float(num) >= navigation.MAX_X /2:
+                print(f"Please input a number smaller than {int(navigation.MAX_X /2)}")
             elif float(num) < -100:
                 print(f"Please input a number large than -100")
-            return -100 <= float(num) < navigation.MAX_X 
-        elif coordinate == "y":
-            if float(num) > navigation.MAX_Y:
+            return -100 <= float(num) < int(navigation.MAX_X /2)
+        elif axis == "y":
+            if float(num) >= navigation.MAX_Y:
                 print(f"Please input a number smaller than {navigation.MAX_Y}")
             elif float(num) < 0:
                 print(f"Please input a number large than 0")
@@ -39,55 +39,55 @@ class DataInput:
 
     def check_double_zero(self, num_x: int, num_y: int) -> bool:
         '''
-        判斷是否輸入座標為(0, 0)
+        determine if the input coordinates are (0, 0) 
 
         Args:
-            num_x: 輸入x座標
-            num_y: 輸入y座標
+            num_x: input x-coordinate 
+            num_y: input y-coordinate 
 
         Returns:
-                bool: 判斷的結果布林值
+                bool: boolean value of the judgment result
         '''
         return num_x == 0 and num_y == 0
     
 
     def is_valid_input(self, num: str) -> bool:
         '''
-        排除輸入值是非數字字符的字串、英文、小數點
+        exclude input values that are non-numeric characters, English, or decimal points
 
         Args:
-            num: 輸入的座標
+            num: input coordinates 
 
         Returns:
-                bool: 是否符合條件的布林值
+                bool: boolean value of whether it meets the criteria
         '''
         num_format = re.compile(r"^\-?[0-9]+$")
         return re.match(num_format, num)
 
 
-    def get_input(self, coordinate: str) -> None:
+    def get_input(self, axis: str) -> None:
         '''
-        根據輸入的數字進行規則判斷
+        rule-based judgment based on the input number
 
         Args:
-            coordinate: 輸入的數字是x座標還是y座標
+            axis: the input str would "x" or "y"
         '''
         while True:
-            user_input = input(f"Please input end point, coordinates {coordinate} = ")
+            user_input = input(f"Please input end point, coordinates {axis} = ")
             if self.is_valid_input(user_input):
                 num = int(user_input)
-                if self.check_number_range(num, coordinate):
+                if self.check_number_range(num, axis):
                     return num
             else:
                 print("Please enter an integer.")
 
     def check_number(self) -> int:
         '''
-        輸入座標，進行是否為原點(0, 0)以及其他判斷
+        input coordinates, check whether it is the origin (0, 0) and other judgments
 
         Returns:
-                num_x (int): 符合條件的x座標. 
-                num_y (int): 符合條件的y座標
+                num_x (int): x-coordinate that meets the criteria
+                num_y (int): y-coordinate that meets the criteria
         '''
         self.num_x = self.get_input("x")
         self.num_y = self.get_input("y")
@@ -102,4 +102,4 @@ class DataInput:
 if __name__ == "__main__":
     input_number = DataInput()
     x, y = input_number.check_number()
-    # print("(x, y) = {}, {}".format(x, y))
+    print("(x, y) = {}, {}".format(x, y))

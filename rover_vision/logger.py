@@ -1,10 +1,11 @@
 import logging
 def setup_logger(log_file):
-    # 配置日誌設置
+    
+    # configuration of log settings 
     logging.basicConfig(level=logging.INFO,
                         format = '%(asctime)s - %(levelname)s - %(filename)s - %(message)s',
                         filename = log_file, 
                         filemode = 'a')
 
-    # 創建並返回一个日誌實例
+    # create and return a log instance
     return logging.getLogger("my_logger")

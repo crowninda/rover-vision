@@ -1,5 +1,5 @@
 
-# 參考來源  https://www.redblobgames.com/ 作者 Amit Patel
+# reference  https://www.redblobgames.com/ author Amit Patel
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
